@@ -1,25 +1,43 @@
 const express = require('express');
-const session = require('express-session');
 const { PrismaClient } = require('@prisma/client');
+const path = require('path');
+const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 
 const app = express();
+const port = 5000;
 const prisma = new PrismaClient();
 
-// Session middleware setup
-app.use(session({
-  secret: 'your_session_secret', // Replace with a strong, random string
-  resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+
+app.use(express.static(path.join(__dirname, '../public')));
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+app.post('/create-account', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    await prisma.users.create({
+      data: {
+        username: username,
+        password: hashedPassword
+      }
+    });
+
+    res.sendFile(path.join(__dirname, '../public/homepage.html'));
+    console.log('Account created successfully');
+  } catch (error) {
+    if (error.code === 'P2002') {
+      res.sendFile(path.join(__dirname, '../public/index.html'));
+      console.log('Username already exists');
+    } else {
+      res.sendFile(path.join(__dirname, '../public/index.html'));
+      console.log('Internal server error');
+    }
   }
-}));
+});
 
-// ... other middleware and route setup ...
-
-// Modify your login route
 app.post('/log-in', async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -28,46 +46,33 @@ app.post('/log-in', async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).send('Invalid username or password');
+      res.sendFile(path.join(__dirname, '../public/index.html'));
+      console.log('User does not exist');
+      return;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).send('Invalid username or password');
+      res.sendFile(path.join(__dirname, '../public/index.html'));
+      console.log('Incorrect password');
+      return;
     }
 
-    // Set user information in session
-    req.session.userId = user.id;
-    req.session.username = user.username;
+    // Implement proper session management here
 
     res.sendFile(path.join(__dirname, '../public/homepage.html'));
+    console.log('Login successful');
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).send('Internal server error');
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+    console.log('Internal server error');
   }
 });
 
-// Add a logout route
-app.get('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).send('Could not log out, please try again');
-    }
-    res.redirect('/');
-  });
-});
 
-// Middleware to check if user is authenticated
-function isAuthenticated(req, res, next) {
-  if (req.session.userId) {
-    next();
-  } else {
-    res.status(401).send('You need to be logged in to access this page');
-  }
-}
+app.listen(port, () => console.log('Server running on port',port));
 
-// Example of a protected route
-app.get('/profile', isAuthenticated, (req, res) => {
-  res.send(`Welcome to your profile, ${req.session.username}!`);
+process.on('beforeExit', async () => {
+  await prisma.$disconnect();
 });
