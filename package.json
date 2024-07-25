@@ -5,8 +5,6 @@
     "scripts": {
         "start": "node src/node.js",
         "build:css": "tailwindcss -i public/styles.css -o ./public/styles.css --watch",
-        "build": "react-scripts build",
-        "dev": "react-scripts start"
     },
     "keywords": [],
     "author": "",
