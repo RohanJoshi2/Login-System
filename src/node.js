@@ -70,16 +70,19 @@ app.post('/create-account', async (req, res) => {
     await logEvent('account_creation', false, 'Username or password is blank');
     return res.status(400).json({ message: 'Username and password are required' });
   }
+  
   if (containsSpace(username) || containsSpace(password)) {
     console.log('Username or password contains whitespace');
     await logEvent('account_creation', false, 'Username or password contains whitespace');
     return res.status(400).json({ message: 'Username and password cannot contain spaces' });
   }
+  
   if (password.length < 8) {
     console.log('Password is too short');
     await logEvent('account_creation', false, 'Password is too short');
     return res.status(400).json({ message: 'Password must be at least 8 characters long' });
   }
+  
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
    
@@ -88,7 +91,9 @@ app.post('/create-account', async (req, res) => {
         username: username,
         password: hashedPassword
       }
+      
     });
+    
     console.log('Account created successfully');
     await logEvent('account_creation', true, 'Account created successfully');
     res.status(201).json({ message: 'Account created successfully' });
