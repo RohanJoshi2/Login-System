@@ -14,3 +14,11 @@ model users {
   username String @unique
   password String
 }
+
+model logs {
+  type String
+  reason String
+  success String
+  id Int @id @default(autoincrement()) @unique
+  attemptedAt DateTime @default(now())
+}
