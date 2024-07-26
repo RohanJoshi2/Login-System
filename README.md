@@ -3,9 +3,9 @@
 
 <p> P - <a href="https://www.postgresql.org/">PostgreSQL</a> <br>
 H - HTML <br>
-E - Express <br>
-N - Node <br> </p>
+E - <a href="https://expressjs.com/">Express</a> <br>
+N - <a href="https://nodejs.org">Node</a> <br> </p>
 
-<h1>How I used PostgreSQL</h1>
+<h1>Packages and software used in this project</h1>
 
 <p>This is my first tiem interacting with SQL of any kind, so I used a used a software that makes it easy to use. This software is called <a href="https://www.prisma.io/">Prisma</a></p>
