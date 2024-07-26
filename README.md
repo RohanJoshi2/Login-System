@@ -1,6 +1,5 @@
 <h1>This project uses the PHEN tech stack</h1>
 
-
 <p> P - <a href="https://www.postgresql.org/">PostgreSQL</a> <br>
 H - HTML <br>
 E - <a href="https://expressjs.com/">Express</a> <br>
